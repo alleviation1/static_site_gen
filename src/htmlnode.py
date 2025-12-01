@@ -14,13 +14,13 @@ class HtmlNode:
             return result
 
         for prop, prop_value in self.props.items():
-            result += f' {prop}: "{prop_value}"'
+            result += f' {prop}="{prop_value}"'
 
         return result
 
     
     def __repr__(self):
-        return f"tag: {self.tag}, value: {self.value}, children: {self.children}, props: {self.props}"
+        return f"tag: '{self.tag}', value: {self.value}, children: {self.children}, props: {self.props}"
 
 
 class LeafNode(HtmlNode):
@@ -35,7 +35,12 @@ class LeafNode(HtmlNode):
         if not self.tag:
             return f"{self.value}"
 
-        return f"<{self.tag}{self.props if self.props else ""}>{self.value}</{self.tag}>"
+        prop_string = f''
+        if self.props:
+            for prop, prop_value in self.props.items():
+                prop_string += f' {prop}="{prop_value}"'
+
+        return f"<{self.tag}{prop_string}>{self.value}</{self.tag}>"
 
 
     def __repr__(self):
@@ -52,15 +57,19 @@ class ParentNode(HtmlNode):
             raise(ValueError)
 
         if not self.children:
-            raise(ValueError(f"Parent's children nodes must contain values, child: {child}"))
+            raise(ValueError(f"Parent has no children"))
 
         children_string = ""
         for child in self.children:
             children_string += child.to_html()
 
-        print(children_string)
+        prop_string = f''
+        if self.props:
+            for prop, prop_value in self.props.items():
+                prop_string += f' {prop}="{prop_value}"'
 
-        return f"<{self.tag}{self.props if self.props else ""}>{children_string}</{self.tag}>"
+
+        return f"<{self.tag}{prop_string}>{children_string}</{self.tag}>"
 
 
     def __repr__(self):
