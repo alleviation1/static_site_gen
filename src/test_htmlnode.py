@@ -81,7 +81,7 @@ class TestParentNode(unittest.TestCase):
         parent_node = ParentNode("div", [child_node1, child_node2, child_node3])
         self.assertEqual(parent_node.to_html(), '<div><span>span child</span><p>paragraph child</p><a href="https://www.google.com" target="_blank">google</a></div>')
 
-    def test_3(self):
+    def test_to_html_with_nested_parent_nodes(self):
         child_node = LeafNode("p", "child node")
         nested_parent = ParentNode("div", [child_node], {"class": "nested"})
         parent_node = ParentNode("div", [nested_parent])
