@@ -6,7 +6,23 @@ class HtmlNode:
         self.props = props
 
     def to_html(self):
-        raise(NotImplementedError)
+        if not self.tag:
+            raise(ValueError)
+
+        if self.tag == "code":
+            return f"<pre><{self.tag}{self.props_to_html()}>{self.children_to_string()}</{self.tag}></pre>"
+
+        return f"<{self.tag}{self.props_to_html()}>{self.children_to_string()}</{self.tag}>"
+
+    def children_to_string(self):
+        children_string = ""
+        if self.children is not None:
+            for child in self.children:
+                if child.tag == None:
+                    children_string += child.value
+                else:
+                    children_string += child.to_html()
+        return children_string
 
     def props_to_html(self):
         result = f''
