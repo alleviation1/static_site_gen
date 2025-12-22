@@ -6,37 +6,18 @@ class HtmlNode:
         self.props = props
 
     def to_html(self):
-        if not self.tag:
-            raise(ValueError)
-
-        if self.tag == "code":
-            return f"<pre><{self.tag}{self.props_to_html()}>{self.children_to_string()}</{self.tag}></pre>"
-
-        return f"<{self.tag}{self.props_to_html()}>{self.children_to_string()}</{self.tag}>"
-
-    def children_to_string(self):
-        children_string = ""
-        if self.children is not None:
-            for child in self.children:
-                if child.tag == None:
-                    children_string += child.value
-                else:
-                    children_string += child.to_html()
-        return children_string
+        raise NotImplementedError("to_html method not implemented")
 
     def props_to_html(self):
-        result = f''
-        if self.props == None:
-            return result
+        if self.props is None:
+            return ""
+        props_html = ""
+        for prop in self.props:
+            props_html += f' {prop}="{self.props[prop]}"'
+        return props_html
 
-        for prop, prop_value in self.props.items():
-            result += f' {prop}="{prop_value}"'
-
-        return result
-
-    
     def __repr__(self):
-        return f"tag: '{self.tag}', value: {self.value}, children: {self.children}, props: {self.props}"
+        return f"HTMLNode({self.tag}, {self.value}, children: {self.children}, {self.props})"
 
 
 class LeafNode(HtmlNode):
@@ -45,8 +26,6 @@ class LeafNode(HtmlNode):
 
     
     def to_html(self):
-        if not self.value:
-            raise(ValueError)
 
         if not self.tag:
             return f"{self.value}"
@@ -60,7 +39,7 @@ class LeafNode(HtmlNode):
 
 
     def __repr__(self):
-        return f"tag: {self.tag}, value: {self.value}, props: {self.props}"
+        return f"tag: {self.tag}, value: {self.value if self.value else ""}, props: {self.props}"
 
 
 class ParentNode(HtmlNode):

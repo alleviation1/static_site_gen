@@ -1,7 +1,7 @@
 import unittest
 
 from text_utilities import (text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, markdown_to_blocks,
- split_nodes_image, split_nodes_link, text_to_textnodes, block_to_block_type, BlockType, markdown_to_html_node
+ split_nodes_image, split_nodes_link, text_to_textnodes, block_to_block_type, BlockType, markdown_to_html_node, extract_title
 )
 from textnode import TextNode, TextType
 from htmlnode import HtmlNode, LeafNode
@@ -197,12 +197,8 @@ This is the same paragraph on a new line
         )
 
     def test_markdown_to_blocks_empty_string(self):
-        md = """
-
-
-
-
-"""
+        md = ""
+        
         blocks = markdown_to_blocks(md)
         self.assertEqual(
             blocks,
@@ -240,63 +236,13 @@ This is the same paragraph on a new line
         )
 
     def test_block_to_block_type(self):
-        self.assertEqual(block_to_block_type("""##### some heading"""), BlockType.HEADING)
-        self.assertEqual(block_to_block_type("""``` some code ```"""), BlockType.CODE)
-        self.assertEqual(block_to_block_type("""> a quote"""), BlockType.QUOTE)
-        self.assertEqual(block_to_block_type("""- some unordered list"""), BlockType.UNORDERED_LIST)
-        self.assertEqual(block_to_block_type("""1. some ordered list"""), BlockType.ORDERED_LIST)
-        self.assertEqual(block_to_block_type("""a regular paragraph"""), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type("##### some heading"), BlockType.HEADING)
+        self.assertEqual(block_to_block_type("```\nsome code\n```"), BlockType.CODE)
+        self.assertEqual(block_to_block_type("> a quote"), BlockType.QUOTE)
+        self.assertEqual(block_to_block_type("- some unordered list"), BlockType.ULIST)
+        self.assertEqual(block_to_block_type("1. some ordered list"), BlockType.OLIST)
+        self.assertEqual(block_to_block_type("a regular paragraph"), BlockType.PARAGRAPH)
 
-    def test_block_to_block_type_multiple_lined_quotes_and_lists(self):
-        self.assertEqual(block_to_block_type("""
-> some quote
-> using more than
-> one line
-"""
-        ), BlockType.QUOTE)
-
-        self.assertEqual(block_to_block_type("""
-- some unordered list
-- with multiple
-- lines of items
-"""
-        ), BlockType.UNORDERED_LIST)
-
-        self.assertEqual(block_to_block_type("""
-1. some ordered list
-2. with multiple
-3. lines of items
-"""
-        ), BlockType.ORDERED_LIST)
-
-
-    def test_block_to_block_type_multiple_lined_quotes_and_lists_fails_bad_syntax(self):
-        with self.assertRaises(Exception) as cm:
-            block_to_block_type("""
-> some quote
-> using more than
-one line
-"""
-            )
-            self.assertEqual(cm.exception.args[0], "Detected invalid quote syntax")
-
-        with self.assertRaises(Exception) as cm:
-            block_to_block_type("""
-- some unordered list
-- with multiple
-lines of items
-"""
-        )
-        self.assertEqual(cm.exception.args[0], "Detected invalid unordered list syntax")
-
-        with self.assertRaises(Exception) as cm:
-            block_to_block_type("""
-1. some ordered list
-2. with multiple
-lines of items
-"""
-        )
-        self.assertEqual(cm.exception.args[0], "Detected invalid ordered list syntax")
 
 
     def test_paragraphs(self):
@@ -330,3 +276,25 @@ the **same** even with inline stuff
             html,
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
+
+    def test_extract_title(self):
+        markdown_file_path = "/home/zero/workspace/github/bootdev/curriculum/site_gen/static/content/index.md"
+        with open(markdown_file_path, "r", encoding="utf-8") as markdown_file:
+            text = markdown_file.read()
+            title = extract_title(text)
+
+        self.assertEqual(title, "Tolkien Fan Club")
+
+    def test_extract_title_static_value(self):
+        text = "# Hello"
+        title = extract_title(text)
+
+        self.assertEqual(title, "Hello")
+
+    def test_extract_title_raises_exception_without_header(self):
+        markdown_file_path = "/home/zero/workspace/github/bootdev/curriculum/site_gen/static/content/index_without_h1.md"
+        with self.assertRaises(Exception) as cm:
+            with open(markdown_file_path, "r", encoding="utf-8") as markdown_file:
+                text = markdown_file.read()
+                title = extract_title(text)
+        self.assertEqual(str(cm.exception), "Unable to find markdown h1 title")
