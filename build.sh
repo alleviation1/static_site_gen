@@ -1,1 +1,1 @@
-python3 src/main.py "/https://alleviation1.github.io/"
+python3 src/main.py "/https://alleviation1.github.io/static_site_gen/"
