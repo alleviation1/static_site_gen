@@ -1,0 +1,1 @@
+python3 src/main.py "/https://alleviation1.github.io/"
